@@ -1,0 +1,66 @@
+/* orders.css */
+
+/* Định dạng cho phần chính của đơn hàng */
+.orders-main {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #f8f9fa; /* Màu nền sáng */
+    border-radius: 8px; /* Bo góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Đổ bóng */
+}
+
+/* Định dạng cho tiêu đề "No Orders Found" */
+.no-order {
+    text-align: center;
+    font-size: 24px;
+    color: #dc3545; /* Màu đỏ */
+}
+
+/* Định dạng cho danh sách đơn hàng */
+.orders-list {
+    list-style-type: none; /* Bỏ dấu đầu dòng */
+    padding: 0; /* Bỏ padding */
+}
+
+.order-item {
+    margin-bottom: 20px; /* Khoảng cách giữa các đơn hàng */
+    padding: 15px; /* Padding bên trong */
+    background-color: #ffffff; /* Màu nền cho đơn hàng */
+    border: 1px solid #dee2e6; /* Viền cho mỗi đơn hàng */
+    border-radius: 5px; /* Bo góc viền */
+    transition: box-shadow 0.2s ease; /* Hiệu ứng chuyển tiếp */
+}
+
+/* Hiệu ứng khi hover */
+.order-item:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Đổ bóng đậm hơn khi hover */
+}
+
+/* Định dạng tiêu đề cho mỗi đơn hàng */
+.order-title {
+    font-size: 20px;
+    color: #343a40; /* Màu chữ cho tiêu đề đơn hàng */
+    margin-bottom: 10px; /* Khoảng cách dưới tiêu đề */
+}
+
+/* Định dạng cho danh sách sản phẩm trong mỗi đơn hàng */
+.products-list {
+    padding-left: 20px; /* Khoảng cách bên trái cho danh sách sản phẩm */
+}
+
+.product-item {
+    font-size: 16px; /* Kích thước chữ cho sản phẩm */
+    color: #495057; /* Màu chữ cho sản phẩm */
+    margin-bottom: 5px; /* Khoảng cách giữa các sản phẩm */
+}
+
+/* Định dạng cho tiêu đề sản phẩm */
+.product-title {
+    font-weight: bold; /* Chữ đậm */
+}
+
+/* Định dạng cho số lượng sản phẩm */
+.product-quantity {
+    color: #6c757d; /* Màu chữ nhạt cho số lượng */
+}
