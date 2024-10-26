@@ -1,21 +1,22 @@
-const Product = require('../models/product');
-const Order = require('../models/order');
 
+const Product = require('../models/product');
 
 exports.getProducts = (req,res,next)=> {
-    Product.findAll().then(products => {
-        res.render('shop/product-list', {
-            prods: products,
-            pageTitle: 'All Products',
-            path: '/products',
-        });
-    }).catch(err => console.log(err));
+    Product.fetchAll()
+        .then(
+            products => {
+                res.render('shop/product-list', {
+                    prods: products,
+                    pageTitle: 'All Products',
+                    path: '/products',
+                });
+            }).catch(err => console.log(err));
 }
 
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId; // Lấy ID sản phẩm từ tham số URL
 
-    Product.findByPk(prodId) // Sử dụng findByPk để tìm sản phẩm theo ID
+    Product.findById(prodId) // Sử dụng findByPk để tìm sản phẩm theo ID
         .then(product => {
             // if (!product) {
             //     // Nếu không tìm thấy sản phẩm, trả về lỗi 404
@@ -35,7 +36,7 @@ exports.getProduct = (req, res, next) => {
 
 
 exports.getIndex = (req, res, next) => {
-    Product.findAll().then(products => {
+    Product.fetchAll().then(products => {
         res.render('shop/index',{
             prods: products,
             pageTitle: 'Shop',

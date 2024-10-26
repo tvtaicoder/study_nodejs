@@ -1,5 +1,5 @@
-const Product = require('../models/product');
-const {where} = require("sequelize");
+
+const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
@@ -14,13 +14,8 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    Product.create({
-        title: title,
-        price: price,
-        description: description,
-        imageUrl: imageUrl,
-        userId: req.user.id
-    })
+    const product = new Product(title, price, description, imageUrl);
+    product.save()
         .then(result => {
             // console.log(result);
             console.log("Created Product");
@@ -28,20 +23,19 @@ exports.postAddProduct = (req, res, next) => {
         })
         .catch(err => console.log(err));
 };
-
+//
 exports.getEditProduct = (req, res, next) => {
-    const editMode = req.query.edit;
+    const editMode = req.query.edit === 'true'; // Đảm bảo giá trị editMode là boolean
     console.log('Edit Mode:', editMode); // Kiểm tra giá trị editMode
     if (!editMode) {
         return res.redirect('/');
     }
     const prodId = req.params.productId;
 
-    req.user.getProducts({ where: { id: prodId } })
-        .then(products => {
-            const product = products[0];  // Lấy sản phẩm đầu tiên từ mảng kết quả
+    Product.findById(prodId)
+        .then(product => {
             if (!product) {
-                console.log('Product not found');  // Kiểm tra nếu sản phẩm không được tìm thấy
+                console.log('Product not found');
                 return res.redirect('/');
             }
             res.render('admin/edit-product', {
@@ -54,8 +48,6 @@ exports.getEditProduct = (req, res, next) => {
         .catch(err => console.log(err));
 };
 
-
-
 exports.postEditProduct = (req, res, next) => {
     const prodId = req.body.productId;
     const updatedTitle = req.body.title;
@@ -63,62 +55,52 @@ exports.postEditProduct = (req, res, next) => {
     const updatedImageUrl = req.body.imageUrl;
     const updatedDesc = req.body.description;
 
-    Product.findByPk(prodId)
-        .then(product => {
-            if (!product) {
-                return res.redirect('/admin/products'); // Nếu không tìm thấy sản phẩm
-            }
+    const product = new Product(updatedTitle, updatedPrice, updatedDesc, updatedImageUrl, prodId);
 
-            // Cập nhật thông tin sản phẩm
-            product.title = updatedTitle;
-            product.price = updatedPrice;
-            product.imageUrl = updatedImageUrl;
-            product.description = updatedDesc;
-
-            return product.save(); // Lưu sản phẩm
-        })
+    product
+        .save()
         .then(result => {
-            // Khi lưu thành công, chuyển hướng đến trang sản phẩm admin
             console.log('UPDATED PRODUCT!');
             res.redirect('/admin/products');
         })
         .catch(err => {
             console.log(err);
-            res.redirect('/admin/products'); // Xử lý lỗi và chuyển hướng nếu có
+            res.redirect('/admin/products');
         });
 };
 
 
 exports.getProducts = (req, res, next) => {
-    req.user.getProducts().then(
-        products => {
-            res.render('admin/products', {
-                prods: products,
-                pageTitle: 'Admin Products',
-                path: '/admin/products'
-            });
-        }
-    ).catch(err => console.log(err));
-};
-
-exports.postDeleteProduct = (req, res, next) => {
-    const prodId = req.body.productId;
-    console.log(prodId);
-    Product.findByPk(prodId)
-        .then(product => {
-            if (!product) {
-                return res.redirect('/admin/products');
+    Product.fetchAll()
+        .then(
+            products => {
+                res.render('admin/products', {
+                    prods: products,
+                    pageTitle: 'Admin Products',
+                    path: '/admin/products'
+                });
             }
-            return product.destroy();
-        })
-        .then(result => {
-            console.log('DESTROY PRODUCT!');
-            res.redirect('/admin/products');
-        })
-        .catch(err => {
-            console.log(err);
-            res.redirect('/admin/products');
-        });
+        ).catch(err => console.log(err));
 };
+//
+// exports.postDeleteProduct = (req, res, next) => {
+//     const prodId = req.body.productId;
+//     console.log(prodId);
+//     Product.findByPk(prodId)
+//         .then(product => {
+//             if (!product) {
+//                 return res.redirect('/admin/products');
+//             }
+//             return product.destroy();
+//         })
+//         .then(result => {
+//             console.log('DESTROY PRODUCT!');
+//             res.redirect('/admin/products');
+//         })
+//         .catch(err => {
+//             console.log(err);
+//             res.redirect('/admin/products');
+//         });
+// };
 
 

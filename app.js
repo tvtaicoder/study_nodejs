@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const errController = require('./controllers/404');
+const mongoConnect = require('./util/database').mongoConnect;
 
 const app = express();
 
@@ -22,7 +23,7 @@ app.use((req, res, next) => {
     //     })
     //     .catch(err => {
     //         console.log(err);
-    //         next();  // Gọi next() ngay cả khi có lỗi để không làm ứng dụng bị treo
+            next();  // Gọi next() ngay cả khi có lỗi để không làm ứng dụng bị treo
     //     });
 });
 
@@ -30,3 +31,9 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use(errController.get404Page);
+
+mongoConnect(() => {
+    app.listen(3000, () => {
+        console.log('Server is running on port 3000');
+    });
+});
