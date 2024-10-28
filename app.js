@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const errController = require('./controllers/404');
 const mongoConnect = require('./util/database').mongoConnect;
 
+const User = require('./models/user');
+
 const app = express();
 
 app.set('view engine', 'ejs')
@@ -16,15 +18,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-    // User.findByPk(1)
-    //     .then(user => {
-    //         req.user = user;  // Gán người dùng tìm thấy vào req.user
-    //         next();           // Tiếp tục đến middleware hoặc route tiếp theo
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-            next();  // Gọi next() ngay cả khi có lỗi để không làm ứng dụng bị treo
-    //     });
+    User.findById('671cbbf48150e9166d0d9ede')
+        .then(user => {
+            req.user = new User(user.name, user.email, user.cart, user._id);
+            next();           // Tiếp tục đến middleware hoặc route tiếp theo
+        })
+        .catch(err => {
+            console.log(err);
+        });
 });
 
 app.use('/admin', adminRoutes);

@@ -14,7 +14,7 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    const product = new Product(title, price, description, imageUrl);
+    const product = new Product(title, price, description, imageUrl, null, req.user._id);
     product.save()
         .then(result => {
             // console.log(result);
@@ -82,25 +82,17 @@ exports.getProducts = (req, res, next) => {
             }
         ).catch(err => console.log(err));
 };
-//
-// exports.postDeleteProduct = (req, res, next) => {
-//     const prodId = req.body.productId;
-//     console.log(prodId);
-//     Product.findByPk(prodId)
-//         .then(product => {
-//             if (!product) {
-//                 return res.redirect('/admin/products');
-//             }
-//             return product.destroy();
-//         })
-//         .then(result => {
-//             console.log('DESTROY PRODUCT!');
-//             res.redirect('/admin/products');
-//         })
-//         .catch(err => {
-//             console.log(err);
-//             res.redirect('/admin/products');
-//         });
-// };
+
+exports.postDeleteProduct = (req, res, next) => {
+    const prodId = req.body.productId; // Lấy ID sản phẩm từ request body
+    Product.deleteById(prodId) // Gọi phương thức xóa sản phẩm
+        .then(() => {
+            res.redirect('/admin/products'); // Chuyển hướng về trang danh sách sản phẩm sau khi xóa
+        })
+        .catch(err => {
+            console.log(err); // In ra lỗi nếu có
+            res.redirect('/admin/products'); // Chuyển hướng về trang danh sách sản phẩm trong trường hợp có lỗi
+        });
+};
 
 

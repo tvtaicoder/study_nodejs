@@ -62,61 +62,71 @@ exports.getCart = (req, res, next) => {
 exports.postCart = (req, res, next) => {
     // Lấy `productId` từ dữ liệu gửi lên thông qua biểu mẫu (POST request)
     const prodId = req.body.productId;
-
-    // Biến để lưu trữ giỏ hàng lấy được và số lượng sản phẩm mới
-    let fetchedCart;
-    let newQuantity = 1;
-
-    // Lấy giỏ hàng của người dùng hiện tại
-    req.user.getCart()
-        .then(cart => {
-            // Gán giỏ hàng vừa lấy vào biến `fetchedCart`
-            fetchedCart = cart;
-
-            // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa bằng cách tìm theo `prodId`
-            return cart.getProducts({ where: { id: prodId } });
-        })
-        .then(products => {
-            // Biến để lưu trữ sản phẩm (nếu tìm thấy trong giỏ hàng)
-            let product;
-
-            // Nếu sản phẩm đã tồn tại trong giỏ hàng (mảng `products` có phần tử), gán sản phẩm đó vào biến `product`
-            if (products.length > 0) {
-                product = products[0]; // Lấy sản phẩm đầu tiên trong mảng (do tìm theo id nên chỉ có 1 sản phẩm)
-            }
-
-            // Nếu sản phẩm đã có trong giỏ hàng
-            if (product) {
-                // Lấy số lượng cũ của sản phẩm trong giỏ hàng
-                const oldQuantity = product.cartItem.quantity;
-
-                // Tăng số lượng sản phẩm trong giỏ hàng lên 1
-                newQuantity = oldQuantity + 1;
-
-                // Trả về sản phẩm để tiếp tục xử lý
-                return product;
-            }
-
-            // Nếu sản phẩm chưa có trong giỏ hàng, tìm sản phẩm trong cơ sở dữ liệu theo `prodId`
-            return Product.findByPk(prodId);
-        })
+    Product.findById(prodId)
         .then(product => {
-            // Sau khi đã có sản phẩm (có thể là sản phẩm đã có trong giỏ hàng hoặc sản phẩm mới),
-            // thêm sản phẩm vào giỏ hàng với số lượng mới (hoặc ban đầu là 1)
-            return fetchedCart.addProduct(product, {
-                through: {
-                    quantity: newQuantity // Ghi chú rằng đây là thông tin của bảng `CartItem` với cột `quantity`
-                }
-            });
+            return req.user.addToCart(product);
         })
-        .then(() => {
-            // Sau khi đã thêm sản phẩm vào giỏ hàng, chuyển hướng người dùng về trang giỏ hàng
-            res.redirect('/cart');
+        .then(result => {
+            console.log(result);
         })
-        .catch(err => {
-            // Xử lý lỗi nếu có và in ra console
+        .catch(err =>{
             console.log(err);
-        });
+        })
+    //
+    // // Biến để lưu trữ giỏ hàng lấy được và số lượng sản phẩm mới
+    // let fetchedCart;
+    // let newQuantity = 1;
+    //
+    // // Lấy giỏ hàng của người dùng hiện tại
+    // req.user.getCart()
+    //     .then(cart => {
+    //         // Gán giỏ hàng vừa lấy vào biến `fetchedCart`
+    //         fetchedCart = cart;
+    //
+    //         // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa bằng cách tìm theo `prodId`
+    //         return cart.getProducts({ where: { id: prodId } });
+    //     })
+    //     .then(products => {
+    //         // Biến để lưu trữ sản phẩm (nếu tìm thấy trong giỏ hàng)
+    //         let product;
+    //
+    //         // Nếu sản phẩm đã tồn tại trong giỏ hàng (mảng `products` có phần tử), gán sản phẩm đó vào biến `product`
+    //         if (products.length > 0) {
+    //             product = products[0]; // Lấy sản phẩm đầu tiên trong mảng (do tìm theo id nên chỉ có 1 sản phẩm)
+    //         }
+    //
+    //         // Nếu sản phẩm đã có trong giỏ hàng
+    //         if (product) {
+    //             // Lấy số lượng cũ của sản phẩm trong giỏ hàng
+    //             const oldQuantity = product.cartItem.quantity;
+    //
+    //             // Tăng số lượng sản phẩm trong giỏ hàng lên 1
+    //             newQuantity = oldQuantity + 1;
+    //
+    //             // Trả về sản phẩm để tiếp tục xử lý
+    //             return product;
+    //         }
+    //
+    //         // Nếu sản phẩm chưa có trong giỏ hàng, tìm sản phẩm trong cơ sở dữ liệu theo `prodId`
+    //         return Product.findByPk(prodId);
+    //     })
+    //     .then(product => {
+    //         // Sau khi đã có sản phẩm (có thể là sản phẩm đã có trong giỏ hàng hoặc sản phẩm mới),
+    //         // thêm sản phẩm vào giỏ hàng với số lượng mới (hoặc ban đầu là 1)
+    //         return fetchedCart.addProduct(product, {
+    //             through: {
+    //                 quantity: newQuantity // Ghi chú rằng đây là thông tin của bảng `CartItem` với cột `quantity`
+    //             }
+    //         });
+    //     })
+    //     .then(() => {
+    //         // Sau khi đã thêm sản phẩm vào giỏ hàng, chuyển hướng người dùng về trang giỏ hàng
+    //         res.redirect('/cart');
+    //     })
+    //     .catch(err => {
+    //         // Xử lý lỗi nếu có và in ra console
+    //         console.log(err);
+    //     });
 };
 
 
