@@ -1,8 +1,9 @@
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+
 const errController = require('./controllers/404');
-const mongoConnect = require('./util/database').mongoConnect;
 
 const User = require('./models/user');
 
@@ -18,9 +19,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-    User.findById('671cbbf48150e9166d0d9ede')
+    User.findById('671f8b481af65fb10572bca9')
         .then(user => {
-            req.user = new User(user.name, user.email, user.cart, user._id);
+            req.user = user;
             next();           // Tiếp tục đến middleware hoặc route tiếp theo
         })
         .catch(err => {
@@ -33,8 +34,23 @@ app.use(shopRoutes);
 
 app.use(errController.get404Page);
 
-mongoConnect(() => {
-    app.listen(3000, () => {
-        console.log('Server is running on port 3000');
-    });
-});
+mongoose.connect('mongodb+srv://tester:faaJ8OzQ29fMHAIz@cluster0.maq21.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0')
+    .then(result => {
+        User.findOne().then(user =>{
+            if (!user){
+                const user = new User({
+                    name: 'Tai',
+                    email: 'taika@gmail.com',
+                    cart: {
+                        items: []
+                    }
+                });
+                user.save();
+            }
+        })
+        app.listen(3000);
+    })
+    .catch(err => {
+        console.log(err);
+    })
+

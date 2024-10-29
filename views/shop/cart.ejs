@@ -9,12 +9,12 @@
             <% products.forEach(p => { %>
                 <li class="cart-item">
                     <div class="cart-item-details">
-                        <h2><%= p.title %></h2>
+                        <h2><%= p.productId.title %></h2>
                         <span class="cart-item-quantity">Quantity: <%= p.quantity %></span>
                     </div>
-                    <span class="cart-item-price">$<%= p.price * p.quantity %></span>
+                    <span class="cart-item-price">$<%= p.productId.price * p.quantity %></span>
                     <form action="/cart-delete-item" method="POST" class="delete-form">
-                        <input type="hidden" value="<%= p._id %>" name="productId">
+                        <input type="hidden" value="<%= p.productId._id %>" name="productId">
                         <button class="btn btn-delete" type="submit">
                             Delete
                         </button>
@@ -23,7 +23,7 @@
             <% }) %>
         </ul>
         <div class="cart-total">
-            <h3>Total: $<%= products.reduce((total, p) => total + p.price * p.quantity, 0) %></h3>
+            <h3>Total: $<%= products.reduce((total, p) => total + p.productId.price * p.quantity, 0) %></h3>
         </div>
         <form action="/create-order" method="POST" class="checkout-form">
             <button class="btn btn-checkout" type="submit">Order Now!</button>

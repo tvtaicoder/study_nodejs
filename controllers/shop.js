@@ -1,22 +1,22 @@
-
 const Product = require('../models/product');
+const Order = require('../models/order');
 
 exports.getProducts = (req,res,next)=> {
-    Product.fetchAll()
-        .then(
-            products => {
-                res.render('shop/product-list', {
-                    prods: products,
-                    pageTitle: 'All Products',
-                    path: '/products',
-                });
-            }).catch(err => console.log(err));
+    Product.find()
+        .then(products => {
+            console.log(products);
+            res.render('shop/product-list', {
+                prods: products,
+                pageTitle: 'All Products',
+                path: '/products',
+            });
+        }).catch(err => console.log(err));
 }
 
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId; // Lấy ID sản phẩm từ tham số URL
 
-    Product.findById(prodId) // Sử dụng findByPk để tìm sản phẩm theo ID
+    Product.findById(prodId)
         .then(product => {
             res.render('shop/product-detail', {
                 product: product,
@@ -31,7 +31,7 @@ exports.getProduct = (req, res, next) => {
 
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll().then(products => {
+    Product.find().then(products => {
         res.render('shop/index',{
             prods: products,
             pageTitle: 'Shop',
@@ -41,8 +41,11 @@ exports.getIndex = (req, res, next) => {
 }
 
 exports.getCart = (req, res, next) => {
-    req.user.getCart()
-        .then(products => {
+    req.user
+        .populate('cart.items.productId')
+        .then(user => {
+            const products = user.cart.items;
+            // const products = user.cart.items;
             res.render('shop/cart', {
                 pageTitle: 'Your Cart',
                 path: '/cart',
@@ -74,7 +77,7 @@ exports.postCart = (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
     const prodID = req.body.productId;
-    req.user.deleteItemFromCart(prodID)
+    req.user.removeFromCart(prodID)
         .then(result => {
             // Sau khi xóa thành công, chuyển hướng về trang giỏ hàng
             res.redirect('/cart');
@@ -83,19 +86,39 @@ exports.postCartDeleteProduct = (req, res, next) => {
 }
 
 exports.postOrder = (req, res, next) => {
-    req.user.addOrder()
+    req.user
+        .populate('cart.items.productId')
+        .then(user => {
+            const products = user.cart.items.map(i => {
+                return { quantity: i.quantity, product: i.productId }; // Lấy dữ liệu sản phẩm đầy đủ
+            });
+            const order = new Order({
+                user: {
+                    name: req.user.name,
+                    userId: req.user
+                },
+                products: products
+            });
+            return order.save();
+        })
+        .then(() => {
+            // Làm trống giỏ hàng sau khi đặt hàng
+            req.user.cart.items = [];
+            return req.user.save();
+        })
         .then(() => {
             res.redirect('/orders'); // Chuyển hướng đến trang đơn hàng
         })
         .catch(err => {
-            console.error(err); // Ghi lỗi ra console
+            console.log(err); // Ghi lỗi ra console
             res.status(500).send('An error occurred while processing your order.'); // Phản hồi lỗi đến người dùng
         });
 };
 
 
+
 exports.getOrders = (req, res, next) => {
-    req.user.getOrders()
+    req.user.find()
         .then(
             orders => {
                 res.render('shop/orders', {
